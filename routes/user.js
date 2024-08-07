@@ -5,18 +5,26 @@ const User=require('../models/user')
 router.get("./signin", (res,req)=>{
     return res.render("signin");
 });
-router.get("./signup", (res,req)=>{
+router.get("/signup", (res,req)=>{
     return res.render("signup");
 });
 
-router.post('/signin.ejs',async (req,res)=>{
+router.post("/signin",async (req,res)=>{
     const {email,password}=req.body;
-    const user= User.matchPassword(email,password);
-console.log('User', user)
-return res.redirect("/");
+    try{
+        const token=  await User.matchPasswordAndGenerateToken(email,password);
+
+    }
+    catch(error){
+        return res.render("signin",{
+            error:"Incorrect Password",
+        })
+    }
+    
+return res.cookie('token',token).redirect("/");
 
 })
-router.post("/signup.ejs", async(res,req)=>{
+router.post("/signup", async(res,req)=>{
     const{fullName,email,password}=req.body;
     await User.create({
         fullName,
